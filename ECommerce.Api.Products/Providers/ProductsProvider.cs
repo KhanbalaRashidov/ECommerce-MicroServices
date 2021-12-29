@@ -2,6 +2,7 @@
 using ECommerce.Api.Products.Db;
 using ECommerce.Api.Products.Interfaces;
 using ECommerce.Api.Products.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerce.Api.Products.Providers
 {
@@ -32,9 +33,46 @@ namespace ECommerce.Api.Products.Providers
             }
         }
 
-        public Task<(bool IsSuccess, IEnumerable<Models.Product> Products, string ErrorMessage)> GetProductsAsync()
+        public async Task<(bool IsSuccess, IEnumerable<Models.Product> Products, string ErrorMessage)> GetProductsAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var products = await _dbContext.Products.ToListAsync();
+
+                if (products != null && products.Any())
+                {
+                    var result =  _mapper.Map<IEnumerable<Db.Product>, IEnumerable<Models.Product>>(products);
+                    return (true, result, null);
+                }
+                return (false, null, "Not found");
+            }
+            catch (Exception ex)
+            {
+
+                _logger?.LogError(ex.ToString());
+                return (false, null, ex.Message);
+            }
+        }
+
+        public async Task<(bool IsSuccess, Models.Product Product, string ErrorMessage)> GetProductAsync(int id)
+        {
+            try
+            {
+                var product = await _dbContext.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+                if (product != null)
+                {
+                    var result = _mapper.Map<Db.Product, Models.Product>(product);
+                    return (true, result, null);
+                }
+                return (false, null, "Not Found");
+            }
+            catch (Exception ex)
+            {
+
+                _logger?.LogError(ex.ToString());
+                return (false, null, ex.Message);
+            }
         }
     }
 }
