@@ -5,9 +5,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddScoped<ISearchService, SearchService>();
 builder.Services.AddScoped<IOrdersService, OrdersService>();
+builder.Services.AddScoped<IProductsService, ProductsService>();
 builder.Services.AddHttpClient("OrdersService", config =>
 {
     config.BaseAddress = new Uri(builder.Configuration["Services:Orders"]);
+});
+builder.Services.AddHttpClient("ProductsService", config =>
+{
+    config.BaseAddress = new Uri(builder.Configuration["Services:Products"]);
 });
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

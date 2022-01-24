@@ -17,4 +17,11 @@
     <ProjectReference Include="..\ECommerce.Api.Search\ECommerce.Api.Search.csproj" />
   </ItemGroup>
 
+	<system.net>
+		<defaultProxy>
+			<proxy usesystemdefault="False"/>
+		</defaultProxy>
+	</system.net>
+
+
 </Project>
