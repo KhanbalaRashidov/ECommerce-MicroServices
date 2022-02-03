@@ -6,14 +6,17 @@ namespace ECommerce.Api.Search.Services
     {
         private readonly IOrdersService _ordersService;
         private readonly IProductsService _productsService;
-        public SearchService(IOrdersService ordersService, IProductsService productsService)
+        private readonly ICustomersService _customersService;
+        public SearchService(IOrdersService ordersService, IProductsService productsService, ICustomersService customersService)
         {
             _ordersService = ordersService;
             _productsService = productsService;
+            _customersService = customersService;
         }
         public async Task<(bool IsSucccess, dynamic SearchResult)> SearchAsync(int customerId)
         {
-            var ordersResult = await _ordersService.GetOrdersAsync(customerId);
+            var customersResult = await _customersService.GetCustomerAsync(customerId);
+            var ordersResult =  await _ordersService.GetOrdersAsync(customerId);
             var productResult = await _productsService.GetProductsAsync();
             if (ordersResult.IsSuccess)
             {
@@ -21,13 +24,17 @@ namespace ECommerce.Api.Search.Services
                 {
                     foreach (var item in order.Items)
                     {
-                        item.ProductName = productResult.Products.FirstOrDefault(p => p.Id == item.ProductId).Name;
+                        item.ProductName = productResult.IsSuccess?
+                            productResult.Products.FirstOrDefault(p => p.Id == item.ProductId)?.Name :
+                            "Product information is not avialable";
                     }
                 }
 
                 var result = new
                 {
-                    Orders = ordersResult.Orders
+                    Customer = customersResult.IsSuccess? 
+                    customersResult.Customer : new { Name= "Customer information is not avialable"},
+                    Orders= ordersResult.Orders
                 };
                 return (true, result);
             }
